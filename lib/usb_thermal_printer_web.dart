@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:usb_device/usb_device.dart';
+import 'package:flutter/foundation.dart';
+import 'package:usb_device/usb_device.dart'
+if (dart.library.io) 'usb_device_empty.dart';
 
 class WebThermalPrinter {
   final UsbDevice usbDevice = UsbDevice();
@@ -21,6 +23,9 @@ class WebThermalPrinter {
         required int productId,
         int? interfaceNo,
         int? endpointNo}) async {
+    if (kIsWeb == false) {
+      return;
+    }
     interfaceNumber = interfaceNo ?? 0;
     endpointNumber = endpointNo ?? 1;
     pairedDevice ??= await usbDevice.requestDevices(
@@ -33,6 +38,9 @@ class WebThermalPrinter {
       String title,
       String value,
       ) async {
+    if (!kIsWeb) {
+      return;
+    }
     var titleColumnWidth = 18;
     var valueColumnWidth = 12;
 
@@ -75,6 +83,9 @@ class WebThermalPrinter {
   }
 
   Future<void> printBarcode(String barcodeData) async {
+    if (kIsWeb == false) {
+      return;
+    }
     var barcodeBytes = Uint8List.fromList([
       0x1d, 0x77, 0x02, // Set barcode height to 64 dots (default is 50 dots)
       0x1d, 0x68, 0x64, // Set barcode text position to below barcode
@@ -107,6 +118,9 @@ class WebThermalPrinter {
         bool? bold,
         bool centerAlign = false,
       }) async {
+    if (kIsWeb == false) {
+      return;
+    }
     var encodedText =
     utf8.encode((bold ?? false) ? "\x1B[$text\x1B\n" : "$text\n");
     if (centerAlign) {
@@ -123,19 +137,27 @@ class WebThermalPrinter {
   }
 
   Future<void> printEmptyLine() async {
+    if (kIsWeb == false) {
+      return;
+    }
     var encodedText = utf8.encode("\n");
     var buffer = Uint8List.fromList(encodedText).buffer;
     await usbDevice.transferOut(pairedDevice, endpointNumber, buffer);
   }
 
   Future<void> printDottedLine() async {
+    if (kIsWeb == false) {
+      return;
+    }
     var encodedText = utf8.encode("\n--------------------------------\n");
     var buffer = Uint8List.fromList(encodedText).buffer;
     await usbDevice.transferOut(pairedDevice, endpointNumber, buffer);
   }
 
   Future<void> closePrinter() async {
+    if (kIsWeb == false) {
+      return;
+    }
     await usbDevice.close(pairedDevice);
   }
 }
-
