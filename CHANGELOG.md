@@ -1,3 +1,3 @@
-## 0.0.1
+## 0.0.3
 
-* TODO: Describe initial release.
+* Fixed the bug to make the project run on all platforms.
